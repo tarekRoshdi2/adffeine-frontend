@@ -1,0 +1,30 @@
+{
+    "name": "smart-medical-secretary-server",
+    "version": "1.0.0",
+    "description": "Backend for AI Virtual Receptionist SaaS",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js",
+        "dev": "nodemon index.js"
+    },
+    "dependencies": {
+        "@google/generative-ai": "^0.24.1",
+        "@hapi/boom": "^10.0.1",
+        "@supabase/supabase-js": "^2.26.0",
+        "@whiskeysockets/baileys": "^6.5.0",
+        "axios": "^1.4.0",
+        "cors": "^2.8.5",
+        "dotenv": "^16.0.3",
+        "express": "^4.18.2",
+        "googleapis": "^122.0.0",
+        "helmet": "^7.0.0",
+        "morgan": "^1.10.0",
+        "node-cron": "^4.2.1",
+        "node-telegram-bot-api": "^0.67.0",
+        "qrcode": "^1.5.4",
+        "qrcode-terminal": "^0.12.0"
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.22"
+    }
+}
