@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Search, Send, Phone, MoreVertical, User, Trash2, MessageCircle, Send as TelegramIcon, FileText, Facebook } from 'lucide-react';
+import { Search, Send, Phone, MoreVertical, User, Trash2, MessageCircle, Send as TelegramIcon, FileText, Facebook, ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../context/ToastContext';
 import { API_URL } from '../../lib/api';
