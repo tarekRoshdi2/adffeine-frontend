@@ -67,10 +67,17 @@ const AddClinicModal = ({ isOpen, onClose, onClinicAdded }) => {
         e.preventDefault();
         setLoading(true);
         try {
+            // Get session for auth token
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) throw new Error('يرجى تسجيل الدخول كمسؤول');
+
             // 1. Create the Doctor's Auth Account securely via our backend admin route
             const response = await fetch(`${API_URL}/api/admin/create-user`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
+                },
                 body: JSON.stringify({
                     email: formData.doctorEmail,
                     password: formData.doctorPassword
@@ -115,7 +122,8 @@ const AddClinicModal = ({ isOpen, onClose, onClinicAdded }) => {
                 // Rollback: Delete the user we just created
                 console.error("Clinic creation failed, deleting auth user:", newOwnerId);
                 await fetch(`${API_URL}/api/admin/delete-user/${newOwnerId}`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${session.access_token}` }
                 }).catch(e => console.error("Rollback failed:", e));
 
                 throw err;

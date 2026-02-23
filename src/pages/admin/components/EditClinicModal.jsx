@@ -134,11 +134,18 @@ const EditClinicModal = ({ isOpen, onClose, clinic, onClinicUpdated }) => {
         e.preventDefault();
         setLoading(true);
         try {
+            // Get session for auth token
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) throw new Error('يرجى تسجيل الدخول كمسؤول');
+
             // 1. Update User Credentials if changed
             if (formData.doctorEmail || formData.doctorPassword) {
                 const updateRes = await fetch(`${API_URL}/api/admin/update-user`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session.access_token}`
+                    },
                     body: JSON.stringify({
                         userId: clinic.owner_id,
                         email: formData.doctorEmail,

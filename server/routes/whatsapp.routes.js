@@ -8,7 +8,7 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Middleware to verify Clinic Owner token
+// Middleware to verify Clinic Owner or Admin token
 const verifyClinicAuth = async (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) return res.status(401).json({ error: 'Missing Auth Header' });
@@ -19,7 +19,27 @@ const verifyClinicAuth = async (req, res, next) => {
         const { data: { user }, error } = await supabase.auth.getUser(token);
         if (error || !user) throw error;
 
-        // Find doctor's own clinic
+        // Check user role
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+        const role = profile?.role || 'doctor';
+
+        // If Admin, they can pass any clinicId in query or body
+        if (role === 'admin') {
+            const clinicId = req.query.clinicId || req.body.clinicId;
+            if (!clinicId) return res.status(400).json({ error: 'clinicId is required for admin' });
+
+            req.user = user;
+            req.clinicId = clinicId;
+            req.isAdmin = true;
+            return next();
+        }
+
+        // If Doctor, find their own clinic
         const { data: clinic } = await supabase
             .from('clinics')
             .select('id')
@@ -30,6 +50,7 @@ const verifyClinicAuth = async (req, res, next) => {
 
         req.user = user;
         req.clinicId = clinic.id;
+        req.isAdmin = false;
         next();
     } catch (err) {
         console.error("Auth Middleware Error:", err);
