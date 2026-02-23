@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, MessageSquare, Users, BarChart, Settings, Activity, LogOut, Facebook, Smartphone } from 'lucide-react';
+import { Calendar, MessageSquare, Users, BarChart, Settings, Activity, LogOut, Facebook, Smartphone, X } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase';
 import { API_URL } from '../../../lib/api';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
     const navigate = useNavigate();
     const [wsConnected, setWsConnected] = useState(false);
     const [tgConnected, setTgConnected] = useState(false);
@@ -65,26 +65,44 @@ const Sidebar = () => {
     };
 
     return (
-        <aside className="w-64 glass-panel h-screen sticky top-0 flex flex-col border-r border-white/10 bg-slate-900/50 backdrop-blur-xl">
-            <div className="p-6 flex items-center gap-3">
-                <div className="w-8 h-8 bg-sky-500 rounded-lg flex items-center justify-center neon-shadow">
-                    <Activity className="text-white" size={20} />
-                </div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-sky-400 to-emerald-400 bg-clip-text text-transparent">
-                    عيادتي الذكية
-                </h1>
-            </div>
+        <>
+            {/* Mobile Overlay Backdrop */}
+            {isOpen && (
+                <div 
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+                    onClick={onClose}
+                />
+            )}
 
-            <nav className="flex-1 px-4 space-y-2 mt-4">
-                <NavItem to="/dashboard" end icon={<BarChart size={20} />} label="نظرة عامة" />
-                <NavItem to="/dashboard/calendar" icon={<Calendar size={20} />} label="المواعيد" />
-                <NavItem to="/dashboard/patients" icon={<Users size={20} />} label="سجل المرضى" />
-                <NavItem to="/dashboard/messages" icon={<MessageSquare size={20} />} label="المحادثات" />
-
-                <div className="pt-4 border-t border-white/10 mt-4">
-                    <NavItem to="/dashboard/settings" icon={<Settings size={20} />} label="الإعدادات" />
+            <aside className={`
+                w-64 glass-panel h-screen fixed lg:sticky top-0 right-0 z-50 flex flex-col border-l lg:border-r border-white/10 bg-slate-900/90 lg:bg-slate-900/50 backdrop-blur-xl transition-transform duration-300
+                ${isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
+            `}>
+                <div className="p-6 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-sky-500 rounded-lg flex items-center justify-center neon-shadow">
+                            <Activity className="text-white" size={20} />
+                        </div>
+                        <h1 className="text-xl font-bold bg-gradient-to-r from-sky-400 to-emerald-400 bg-clip-text text-transparent">
+                            عيادتي الذكية
+                        </h1>
+                    </div>
+                    {/* Mobile Close Button */}
+                    <button onClick={onClose} className="lg:hidden p-2 text-slate-400 hover:text-white">
+                        <X size={24} />
+                    </button>
                 </div>
-            </nav>
+
+                <nav className="flex-1 px-4 space-y-2 mt-4" onClick={() => window.innerWidth < 1024 && onClose()}>
+                    <NavItem to="/dashboard" end icon={<BarChart size={20} />} label="نظرة عامة" />
+                    <NavItem to="/dashboard/calendar" icon={<Calendar size={20} />} label="المواعيد" />
+                    <NavItem to="/dashboard/patients" icon={<Users size={20} />} label="سجل المرضى" />
+                    <NavItem to="/dashboard/messages" icon={<MessageSquare size={20} />} label="المحادثات" />
+
+                    <div className="pt-4 border-t border-white/10 mt-4">
+                        <NavItem to="/dashboard/settings" icon={<Settings size={20} />} label="الإعدادات" />
+                    </div>
+                </nav>
 
             <div className="p-4 space-y-3">
                 <div className="glass-panel p-3 rounded-2xl border border-white/5 space-y-3 bg-slate-900/40">
@@ -114,6 +132,7 @@ const Sidebar = () => {
                 </button>
             </div>
         </aside>
+        </>
     );
 };
 

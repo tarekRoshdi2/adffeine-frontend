@@ -42,39 +42,56 @@ const ClinicSettingsModal = ({ isOpen, onClose, clinic }) => {
                 if (!session) return;
                 setAuthToken(session.access_token);
 
-                // Fetch current prompt from DB
+                // Fetch current prompt and extra config from DB directly (always reliable)
                 const { data: clinicData } = await supabase
                     .from('clinics')
-                    .select('system_prompt')
+                    .select('system_prompt, telegram_token, messenger_token, messenger_page_id, messenger_verify_token')
                     .eq('id', clinic.id)
                     .single();
 
                 setSystemPrompt(clinicData?.system_prompt || '');
 
-                // Fetch Automation Status & Config from Backend
-                const res = await fetch(`${API_URL}/api/whatsapp/status?clinicId=${clinic.id}`, {
-                    headers: { 'Authorization': `Bearer ${session.access_token}` }
-                });
+                // Pre-fill from DB first so fields are never empty
+                setConfig(prev => ({
+                    ...prev,
+                    telegram_token: clinicData?.telegram_token || '',
+                    messenger_token: clinicData?.messenger_token || '',
+                    messenger_page_id: clinicData?.messenger_page_id || '',
+                    messenger_verify_token: clinicData?.messenger_verify_token || '',
+                    messenger_webhook_url: API_URL + '/api/messenger/webhook?clinicId=' + clinic.id
+                }));
 
-                if (res.ok) {
-                    const data = await res.json();
-                    setStatus(data.status);
-                    setConfig(prev => ({
-                        ...prev,
-                        phone_number_id: data.phone_number_id || '',
-                        access_token: data.access_token ? 'MASKED_TOKEN' : '',
-                        verify_token: data.verify_token || '',
-                        webhook_url: API_URL + '/api/whatsapp/webhook',
-                        telegram_token: data.telegram_token || '',
-                        messenger_token: data.messenger_token || '',
-                        messenger_page_id: data.messenger_page_id || '',
-                        messenger_verify_token: data.messenger_verify_token || '',
-                        messenger_webhook_url: API_URL + '/api/messenger/webhook?clinicId=' + clinic.id
-                    }));
+                // Then try to fetch WhatsApp session data from backend (may fail for admin)
+                try {
+                    const res = await fetch(`${API_URL}/api/whatsapp/status?clinicId=${clinic.id}`, {
+                        headers: { 'Authorization': `Bearer ${session.access_token}` }
+                    });
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        setStatus(data.status);
+                        setConfig(prev => ({
+                            ...prev,
+                            phone_number_id: data.phone_number_id || '',
+                            access_token: data.access_token ? 'MASKED_TOKEN' : '',
+                            verify_token: data.verify_token || '',
+                            webhook_url: API_URL + '/api/whatsapp/webhook',
+                            telegram_token: data.telegram_token || prev.telegram_token,
+                            messenger_token: data.messenger_token || prev.messenger_token,
+                            messenger_page_id: data.messenger_page_id || prev.messenger_page_id,
+                            messenger_verify_token: data.messenger_verify_token || prev.messenger_verify_token,
+                            messenger_webhook_url: API_URL + '/api/messenger/webhook?clinicId=' + clinic.id
+                        }));
+                    } else {
+                        console.warn('WhatsApp status API returned:', res.status, '— using DB fallback');
+                    }
+                } catch (apiErr) {
+                    console.warn('WhatsApp status API unavailable, using DB data:', apiErr.message);
                 }
+
             } catch (error) {
                 console.error('Error fetching clinic settings:', error);
-                toast.error('فشل تحميل الإعدادات');
+                toast.error('فشل تحميل الإعدادات: ' + error.message);
             } finally {
                 setLoading(false);
             }

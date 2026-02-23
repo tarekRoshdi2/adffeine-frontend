@@ -110,74 +110,83 @@ const Settings = () => {
             <div className="flex gap-4 border-b border-white/10 mb-8">
                 <button
                     onClick={() => setActiveTab('basic')}
-                    className={`pb-4 px-2 font-bold transition-all relative ${activeTab === 'basic' ? 'text-sky-400' : 'text-slate-500 hover:text-slate-300'}`}
+                    className={`pb-4 px-1 md:px-2 font-bold transition-all relative text-sm md:text-base ${activeTab === 'basic' ? 'text-sky-400' : 'text-slate-500 hover:text-slate-300'}`}
                 >
                     <div className="flex items-center gap-2">
-                        <Building size={18} />
+                        <Building size={16} className="md:w-[18px] md:h-[18px]" />
                         البيانات الأساسية
                     </div>
                     {activeTab === 'basic' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-sky-400 rounded-full" />}
                 </button>
                 <button
                     onClick={() => setActiveTab('automation')}
-                    className={`pb-4 px-2 font-bold transition-all relative ${activeTab === 'automation' ? 'text-sky-400' : 'text-slate-500 hover:text-slate-300'}`}
+                    className={`pb-4 px-1 md:px-2 font-bold transition-all relative text-sm md:text-base ${activeTab === 'automation' ? 'text-sky-400' : 'text-slate-500 hover:text-slate-300'}`}
                 >
                     <div className="flex items-center gap-2">
-                        <Zap size={18} />
+                        <Zap size={16} className="md:w-[18px] md:h-[18px]" />
                         الأتمتة والربط
                     </div>
                     {activeTab === 'automation' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-sky-400 rounded-full" />}
                 </button>
             </div>
 
-            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 p-1">
                 {activeTab === 'basic' ? (
                     <>
-                        <div className="glass-panel p-8 rounded-2xl border border-white/5 space-y-6">
-                            <h2 className="text-xl font-bold flex items-center gap-2">
+                        <div className="glass-panel p-4 md:p-8 rounded-2xl border border-white/5 space-y-6">
+                            <h2 className="text-lg md:text-xl font-bold flex items-center gap-2">
                                 <Building className="text-sky-500" />
                                 البيانات الأساسية للعيادة
                             </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                 <div>
-                                    <label className="block text-sm text-slate-400 mb-2 font-bold">اسم العيادة</label>
+                                    <label className="block text-xs md:text-sm text-slate-400 mb-2 font-bold">اسم العيادة</label>
                                     <input
                                         type="text"
                                         name="clinic_name"
                                         value={clinic.clinic_name || ''}
                                         onChange={handleChange}
-                                        className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:border-sky-500 outline-none"
+                                        className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:border-sky-500 outline-none text-sm md:text-base"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm text-slate-400 mb-2 font-bold">التخصص</label>
+                                    <label className="block text-xs md:text-sm text-slate-400 mb-2 font-bold">التخصص</label>
                                     <input
                                         type="text"
                                         name="specialty"
                                         value={clinic.specialty || ''}
                                         onChange={handleChange}
-                                        className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:border-sky-500 outline-none"
+                                        className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:border-sky-500 outline-none text-sm md:text-base"
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="glass-panel p-8 rounded-2xl border border-white/5 space-y-6">
-                            <h2 className="text-xl font-bold flex items-center gap-2"><Clock className="text-sky-500" /> ساعات العمل والمواعيد</h2>
-                            <div className="space-y-4">
+                        <div className="glass-panel p-4 md:p-8 rounded-2xl border border-white/5 space-y-6">
+                            <h2 className="text-lg md:text-xl font-bold flex items-center gap-2"><Clock className="text-sky-500" /> ساعات العمل والمواعيد</h2>
+                            <div className="space-y-3 md:space-y-4">
                                 {Object.entries(workingHours).map(([key, day]) => (
-                                    <div key={key} className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${day.enabled ? 'bg-slate-800/50 border-slate-700' : 'bg-slate-900/30 border-white/5 opacity-60'}`}>
-                                        <div className="flex items-center gap-3 w-40">
-                                            <label className="relative inline-flex items-center cursor-pointer">
-                                                <input type="checkbox" className="sr-only peer" checked={day.enabled} onChange={() => toggleDay(key)} />
-                                                <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-600"></div>
-                                            </label>
-                                            <span className={`font-bold ${day.enabled ? 'text-white' : 'text-slate-500'}`}>{day.label}</span>
+                                    <div key={key} className={`flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-xl border transition-all ${day.enabled ? 'bg-slate-800/50 border-slate-700' : 'bg-slate-900/30 border-white/5 opacity-60'}`}>
+                                        <div className="flex items-center justify-between sm:justify-start gap-4 sm:w-40">
+                                            <div className="flex items-center gap-3">
+                                                <label className="relative inline-flex items-center cursor-pointer">
+                                                    <input type="checkbox" className="sr-only peer" checked={day.enabled} onChange={() => toggleDay(key)} />
+                                                    <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-600"></div>
+                                                </label>
+                                                <span className={`font-bold ${day.enabled ? 'text-white' : 'text-slate-500'}`}>{day.label}</span>
+                                            </div>
+                                            <div className="sm:hidden text-xs">{day.enabled ? <span className="text-emerald-400 flex items-center gap-1"><Check size={12} /> مفعل</span> : <span className="text-slate-500">مغلق</span>}</div>
                                         </div>
-                                        <div className="flex-1 text-sm">{day.enabled ? <span className="text-emerald-400 flex items-center gap-1"><Check size={14} /> يوم عمل مفعل</span> : <span className="text-slate-500">مغلق</span>}</div>
-                                        <div className={`flex items-center gap-4 ${!day.enabled && 'pointer-events-none opacity-50'}`}>
-                                            <input type="time" value={day.start} onChange={(e) => updateTime(key, 'start', e.target.value)} className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-sky-500 outline-none" />
-                                            <input type="time" value={day.end} onChange={(e) => updateTime(key, 'end', e.target.value)} className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-sky-500 outline-none" />
+                                        <div className="hidden sm:block flex-1 text-sm">{day.enabled ? <span className="text-emerald-400 flex items-center gap-1"><Check size={14} /> يوم عمل مفعل</span> : <span className="text-slate-500">مغلق</span>}</div>
+                                        <div className={`flex items-center justify-between sm:justify-end gap-2 md:gap-4 ${!day.enabled && 'pointer-events-none opacity-50'}`}>
+                                            <div className="flex items-center gap-2 flex-1 sm:flex-none">
+                                                <span className="text-[10px] text-slate-500 sm:hidden">من</span>
+                                                <input type="time" value={day.start} onChange={(e) => updateTime(key, 'start', e.target.value)} className="w-full sm:w-auto bg-slate-900 border border-slate-700 rounded-lg px-2 md:px-3 py-2 text-white text-xs md:text-sm focus:border-sky-500 outline-none" />
+                                            </div>
+                                            <div className="flex items-center gap-2 flex-1 sm:flex-none">
+                                                <span className="text-[10px] text-slate-500 sm:hidden">إلى</span>
+                                                <input type="time" value={day.end} onChange={(e) => updateTime(key, 'end', e.target.value)} className="w-full sm:w-auto bg-slate-900 border border-slate-700 rounded-lg px-2 md:px-3 py-2 text-white text-xs md:text-sm focus:border-sky-500 outline-none" />
+                                            </div>
                                         </div>
                                     </div>
                                 ))}

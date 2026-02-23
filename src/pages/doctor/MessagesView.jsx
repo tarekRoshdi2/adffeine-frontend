@@ -17,6 +17,7 @@ const MessagesView = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [lastActivePlatform, setLastActivePlatform] = useState('whatsapp'); // Tracks last incoming message platform
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, type: null });
+    const [showChatOnMobile, setShowChatOnMobile] = useState(false);
     const messagesEndRef = useRef(null);
 
     // ── Platform Helpers ──────────────────────────────────────────────────────
@@ -49,6 +50,7 @@ const MessagesView = () => {
             const target = chats.find(c => c.id === location.state.patientId);
             if (target) {
                 setSelectedChat(target);
+                setShowChatOnMobile(true);
             }
         }
     }, [location.state, chats]);
@@ -274,9 +276,12 @@ const MessagesView = () => {
     };
 
     return (
-        <div className="flex h-[calc(100vh-8rem)] gap-6">
+        <div className="flex h-[calc(100vh-8rem)] gap-6 relative">
             {/* Chat List */}
-            <div className="w-1/3 glass-panel flex flex-col rounded-2xl border border-white/5 overflow-hidden">
+            <div className={`
+                ${showChatOnMobile ? 'hidden md:flex' : 'flex'}
+                w-full md:w-1/3 glass-panel flex-col rounded-2xl border border-white/5 overflow-hidden
+            `}>
                 <div className="p-4 border-b border-white/5">
                     <div className="relative">
                         <Search className="absolute right-3 top-2.5 text-slate-500" size={18} />
@@ -297,6 +302,7 @@ const MessagesView = () => {
                                 key={chat.id}
                                 onClick={() => {
                                     setSelectedChat(chat);
+                                    setShowChatOnMobile(true);
                                 }}
                                 className={`p-4 flex gap-3 cursor-pointer hover:bg-white/5 transition-colors relative ${selectedChat?.id === chat.id ? 'bg-white/5 border-r-2 border-sky-500' : ''}`}
                             >
@@ -345,10 +351,20 @@ const MessagesView = () => {
 
             {/* Chat Window */}
             {selectedChat ? (
-                <div className="flex-1 glass-panel flex flex-col rounded-2xl border border-white/5 overflow-hidden">
+                <div className={`
+                    ${showChatOnMobile ? 'flex' : 'hidden md:flex'}
+                    flex-1 glass-panel flex-col rounded-2xl border border-white/5 overflow-hidden
+                `}>
                     {/* Header */}
                     <div className="p-4 border-b border-white/5 flex justify-between items-center bg-slate-900/30">
                         <div className="flex items-center gap-3">
+                            {/* Back Button for Mobile */}
+                            <button
+                                onClick={() => setShowChatOnMobile(false)}
+                                className="md:hidden p-2 -mr-2 text-slate-400 hover:text-white"
+                            >
+                                <ChevronRight size={24} />
+                            </button>
                             <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400">
                                 <User size={20} />
                             </div>

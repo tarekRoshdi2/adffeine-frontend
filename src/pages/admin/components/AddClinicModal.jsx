@@ -71,6 +71,17 @@ const AddClinicModal = ({ isOpen, onClose, onClinicAdded }) => {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) throw new Error('يرجى تسجيل الدخول كمسؤول');
 
+            // 0. Check email uniqueness BEFORE creating user
+            const { data: existing } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('email', formData.doctorEmail)
+                .maybeSingle();
+
+            if (existing) {
+                throw new Error(`البريد الإلكتروني "${formData.doctorEmail}" مستخدم بالفعل لعيادة أخرى. استخدم بريدًا إلكترونيًا مختلفًا.`);
+            }
+
             // 1. Create the Doctor's Auth Account securely via our backend admin route
             const response = await fetch(`${API_URL}/api/admin/create-user`, {
                 method: 'POST',
@@ -180,8 +191,8 @@ const AddClinicModal = ({ isOpen, onClose, onClinicAdded }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative" dir="rtl">
+        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm p-0 md:p-4">
+            <div className="bg-slate-900 border border-white/10 rounded-t-2xl md:rounded-2xl w-full md:max-w-lg p-5 md:p-6 shadow-2xl relative max-h-[95vh] md:max-h-[90vh] overflow-y-auto" dir="rtl">
                 <button
                     onClick={onClose}
                     className="absolute left-4 top-4 text-slate-400 hover:text-white transition-colors"

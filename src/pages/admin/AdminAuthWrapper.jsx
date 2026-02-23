@@ -1,37 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { Lock, Mail, ShieldCheck } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
-import AdminDashboard from './AdminDashboard';
 
-const AdminAuthWrapper = () => {
+const AdminAuthWrapper = ({ children }) => {
     const toast = useToast();
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
-    const [checking, setChecking] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    // On mount: check if already logged in as admin
     useEffect(() => {
-        const checkSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', session.user.id)
-                    .single();
-                if (profile?.role === 'admin') {
-                    setIsAdmin(true);
-                }
-            }
-            setChecking(false);
-        };
-        checkSession();
+        checkUser();
     }, []);
+
+    const checkUser = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single();
+
+            if (profile?.role === 'admin') {
+                setIsAdmin(true);
+            } else {
+                await supabase.auth.signOut();
+            }
+        }
+        setLoading(false);
+    };
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -59,77 +58,67 @@ const AdminAuthWrapper = () => {
         }
     };
 
-    // Spinner while checking session
-    if (checking) {
+    if (loading) {
         return (
             <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
             </div>
         );
     }
 
-    // If already authenticated as admin, show the dashboard
-    if (isAdmin) {
-        return <AdminDashboard />;
+    if (!isAdmin) {
+        return (
+            <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+                <div className="glass-panel w-full max-w-md p-8 rounded-3xl border border-white/5 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500" />
+
+                    <div className="flex flex-col items-center mb-8">
+                        <div className="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center text-purple-400 mb-4 border border-purple-500/20">
+                            <Lock size={32} />
+                        </div>
+                        <h1 className="text-3xl font-black text-white">لوحة التحكم</h1>
+                        <p className="text-slate-400 mt-2">أدخل بياناتك للمتابعة</p>
+                    </div>
+
+                    <form onSubmit={handleLogin} className="space-y-4">
+                        <div className="space-y-1">
+                            <label className="text-sm text-slate-400 block px-1">البريد الإلكتروني</label>
+                            <input
+                                required
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:border-purple-500 outline-none transition-colors"
+                                placeholder="tarekroshdi@gmail.com"
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-sm text-slate-400 block px-1">كلمة المرور</label>
+                            <input
+                                required
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:border-purple-500 outline-none transition-colors"
+                                placeholder="••••••••"
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-purple-900/20 mt-4 active:scale-95"
+                        >
+                            دخول
+                        </button>
+                    </form>
+
+                    <p className="text-center text-slate-600 text-[10px] mt-8 uppercase tracking-widest">Smart Shield © 2026</p>
+                </div>
+            </div>
+        );
     }
 
-    // Otherwise, show silent admin login form
-    return (
-        <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/8 rounded-full blur-3xl -mr-20 -mt-20"></div>
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-slate-800/20 rounded-full blur-3xl -ml-20 -mb-20"></div>
-
-            <div className="glass-panel p-8 rounded-2xl border border-white/10 w-full max-w-md relative z-10 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-purple-500/15 border border-purple-500/20 flex items-center justify-center mx-auto mb-5">
-                    <ShieldCheck className="text-purple-400" size={32} />
-                </div>
-
-                <h1 className="text-2xl font-bold mb-2 text-white">
-                    لوحة التحكم
-                </h1>
-                <p className="text-slate-400 mb-8 text-sm">
-                    أدخل بياناتك للمتابعة
-                </p>
-
-                <form onSubmit={handleLogin} className="space-y-4">
-                    <div className="relative">
-                        <Mail className="absolute right-3 top-3.5 text-slate-500" size={20} />
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="البريد الإلكتروني"
-                            className="w-full pr-10 pl-4 py-3 bg-slate-900 border border-slate-700 rounded-xl focus:outline-none focus:border-purple-500 transition-colors text-right"
-                            required
-                        />
-                    </div>
-                    <div className="relative">
-                        <Lock className="absolute right-3 top-3.5 text-slate-500" size={20} />
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="كلمة المرور"
-                            className="w-full pr-10 pl-4 py-3 bg-slate-900 border border-slate-700 rounded-xl focus:outline-none focus:border-purple-500 transition-colors text-right"
-                            required
-                        />
-                    </div>
-
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full py-3 rounded-xl font-bold text-white bg-purple-600 hover:bg-purple-500 transition-all shadow-lg shadow-purple-900/30 disabled:opacity-60 disabled:cursor-not-allowed"
-                    >
-                        {loading ? 'جاري الدخول...' : 'دخول'}
-                    </button>
-                </form>
-
-                <p className="mt-6 text-xs text-slate-600">
-                    Smart Shield &copy; 2026
-                </p>
-            </div>
-        </div>
-    );
+    return children;
 };
 
 export default AdminAuthWrapper;

@@ -1,14 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Save, Settings, ShieldAlert, DollarSign } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { supabase } from '../../lib/supabase';
 
 const AdminSettings = () => {
     const toast = useToast();
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
     const [settings, setSettings] = useState({
-        basePrice: 1500,
+        basePrice: '1500',
         globalAiPrompt: 'يجب دائمًا الرد باحترام ومهنية، وعدم إعطاء أي تشخيصات طبية قاطعة، وتوجيه المريض لزيارة العيادة.'
     });
+
+    // Load settings from DB on mount
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('admin_settings')
+                    .select('key, value');
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    const mapped = {};
+                    data.forEach(row => {
+                        if (row.key === 'base_price') mapped.basePrice = row.value;
+                        if (row.key === 'global_ai_prompt') mapped.globalAiPrompt = row.value;
+                    });
+                    setSettings(prev => ({ ...prev, ...mapped }));
+                }
+            } catch (error) {
+                console.warn('admin_settings table not found, using defaults:', error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchSettings();
+    }, []);
 
     const handleChange = (e) => {
         setSettings({ ...settings, [e.target.name]: e.target.value });
@@ -16,17 +45,32 @@ const AdminSettings = () => {
 
     const handleSave = async (e) => {
         e.preventDefault();
-        setLoading(true);
+        setSaving(true);
         try {
-            // Simulated save for MVP
-            await new Promise(resolve => setTimeout(resolve, 800));
+            const { error } = await supabase
+                .from('admin_settings')
+                .upsert([
+                    { key: 'base_price', value: String(settings.basePrice), updated_at: new Date().toISOString() },
+                    { key: 'global_ai_prompt', value: settings.globalAiPrompt, updated_at: new Date().toISOString() }
+                ], { onConflict: 'key' });
+
+            if (error) throw error;
             toast.success('تم حفظ الإعدادات العامة بنجاح');
         } catch (error) {
-            toast.error('حدث خطأ أثناء حفظ الإعدادات');
+            console.error('Save settings error:', error);
+            toast.error('حدث خطأ أثناء حفظ الإعدادات: ' + error.message);
         } finally {
-            setLoading(false);
+            setSaving(false);
         }
     };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6 max-w-4xl">
@@ -82,10 +126,10 @@ const AdminSettings = () => {
                 <div className="flex justify-end pt-4">
                     <button
                         type="submit"
-                        disabled={loading}
+                        disabled={saving}
                         className="bg-purple-600 hover:bg-purple-500 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-purple-900/20 disabled:opacity-50"
                     >
-                        {loading ? 'جاري الحفظ...' : (
+                        {saving ? 'جاري الحفظ...' : (
                             <>
                                 <Save size={20} />
                                 حفظ جميع الإعدادات

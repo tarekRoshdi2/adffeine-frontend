@@ -87,18 +87,18 @@ const PatientsList = () => {
 
     return (
         <div className="space-y-6 h-[calc(100vh-6rem)] flex flex-col">
-            <header className="flex flex-col md:flex-row justify-between items-center gap-4 bg-slate-900/50 p-4 rounded-2xl border border-white/5 backdrop-blur-sm">
-                <div className="flex items-center gap-3">
+            <header className="flex flex-col lg:flex-row justify-between items-center gap-4 bg-slate-900/50 p-4 md:p-6 rounded-2xl border border-white/5 backdrop-blur-sm">
+                <div className="flex items-center gap-3 w-full lg:w-auto">
                     <div className="bg-blue-600/20 p-2 rounded-lg text-blue-400">
                         <User size={24} />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-white">سجل المرضى</h1>
+                        <h1 className="text-xl md:text-2xl font-bold text-white">سجل المرضى</h1>
                         <p className="text-slate-400 text-xs">عرض والبحث في ملفات المرضى</p>
                     </div>
                 </div>
 
-                <div className="relative w-full md:w-96 group">
+                <div className="relative w-full lg:w-96 group">
                     <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-400 transition-colors" size={20} />
                     <input
                         type="text"

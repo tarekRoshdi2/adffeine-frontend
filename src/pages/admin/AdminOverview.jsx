@@ -21,8 +21,18 @@ const AdminOverview = () => {
             // Count Patients
             const { count: patientsCount } = await supabase.from('patients').select('*', { count: 'exact', head: true });
 
-            // Example MRR calculation (assuming 1500 per active clinic)
-            const mrr = (activeClinics || 0) * 1500;
+            // Load base price from admin_settings (fallback to 1500)
+            let basePrice = 1500;
+            try {
+                const { data: priceRow } = await supabase
+                    .from('admin_settings')
+                    .select('value')
+                    .eq('key', 'base_price')
+                    .maybeSingle();
+                if (priceRow) basePrice = parseFloat(priceRow.value) || 1500;
+            } catch (_) { }
+
+            const mrr = (activeClinics || 0) * basePrice;
 
             setStats({
                 clinicsCount: clinicsCount || 0,
@@ -31,16 +41,37 @@ const AdminOverview = () => {
                 mrr
             });
 
-            // Mock Chart Data for 7 days until real dates are logged sequentially
+            // Real appointments data for last 7 days
             const today = new Date();
-            const data = Array.from({ length: 7 }).map((_, i) => {
+            const sevenDaysAgo = new Date(today);
+            sevenDaysAgo.setDate(today.getDate() - 6);
+            sevenDaysAgo.setHours(0, 0, 0, 0);
+
+            const { data: appointments } = await supabase
+                .from('appointments')
+                .select('appointment_date')
+                .gte('appointment_date', sevenDaysAgo.toISOString());
+
+            // Build a day-by-day count map
+            const dayCountMap = {};
+            const days = Array.from({ length: 7 }).map((_, i) => {
                 const d = new Date(today);
-                d.setDate(d.getDate() - (6 - i));
-                return {
-                    name: d.toLocaleDateString('ar-EG', { weekday: 'short' }),
-                    appointments: Math.floor(Math.random() * 50) + 10
-                };
+                d.setDate(today.getDate() - (6 - i));
+                const key = d.toISOString().split('T')[0];
+                dayCountMap[key] = 0;
+                return { date: d, key };
             });
+
+            (appointments || []).forEach(appt => {
+                const key = appt.appointment_date?.split('T')[0];
+                if (key && dayCountMap[key] !== undefined) dayCountMap[key]++;
+            });
+
+            const data = days.map(({ date, key }) => ({
+                name: date.toLocaleDateString('ar-EG', { weekday: 'short' }),
+                appointments: dayCountMap[key]
+            }));
+
             setChartData(data);
         };
         fetchStats();

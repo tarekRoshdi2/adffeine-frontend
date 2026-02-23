@@ -6,7 +6,7 @@ import AppointmentDetailsModal from './components/AppointmentDetailsModal';
 
 const CalendarView = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
-    const [viewMode, setViewMode] = useState('week'); // 'week' | 'day'
+    const [viewMode, setViewMode] = useState(window.innerWidth < 768 ? 'day' : 'week');
     const [appointments, setAppointments] = useState([]);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState(null);
@@ -20,6 +20,16 @@ const CalendarView = () => {
     const [startHour, setStartHour] = useState(8);
     const [endHour, setEndHour] = useState(24);
     const HOUR_HEIGHT = 80;
+
+    // Handle view mode on resize
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 768) setViewMode('day');
+            else setViewMode('week');
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         if (workingHours) {

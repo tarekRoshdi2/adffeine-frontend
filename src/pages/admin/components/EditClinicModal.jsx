@@ -22,6 +22,7 @@ const EditClinicModal = ({ isOpen, onClose, clinic, onClinicUpdated }) => {
     const [services, setServices] = useState([]);
     const [newServiceInput, setNewServiceInput] = useState('');
     const [fetchingServices, setFetchingServices] = useState(false);
+    const [originalEmail, setOriginalEmail] = useState('');
 
     useEffect(() => {
         if (clinic) {
@@ -38,15 +39,22 @@ const EditClinicModal = ({ isOpen, onClose, clinic, onClinicUpdated }) => {
                 doctorPassword: ''
             });
 
-            // Fetch Doctor Email from profiles
+            // Fetch Doctor Email from backend API (bypasses RLS - ensures correct email per clinic)
             const fetchDoctorEmail = async () => {
-                const { data, error } = await supabase
-                    .from('profiles')
-                    .select('email')
-                    .eq('id', clinic.owner_id)
-                    .single();
-                if (data) {
-                    setFormData(prev => ({ ...prev, doctorEmail: data.email }));
+                try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (!session || !clinic.owner_id) return;
+
+                    const res = await fetch(`${API_URL}/api/admin/user-email/${clinic.owner_id}`, {
+                        headers: { 'Authorization': `Bearer ${session.access_token}` }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        setFormData(prev => ({ ...prev, doctorEmail: data.email || '' }));
+                        setOriginalEmail(data.email || '');
+                    }
+                } catch (err) {
+                    console.warn('Could not fetch doctor email:', err.message);
                 }
             };
             fetchDoctorEmail();
@@ -138,8 +146,10 @@ const EditClinicModal = ({ isOpen, onClose, clinic, onClinicUpdated }) => {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) throw new Error('يرجى تسجيل الدخول كمسؤول');
 
-            // 1. Update User Credentials if changed
-            if (formData.doctorEmail || formData.doctorPassword) {
+            // 1. Update User Credentials only if something actually changed
+            const emailChanged = formData.doctorEmail && formData.doctorEmail !== originalEmail;
+            const passwordChanged = !!formData.doctorPassword;
+            if (emailChanged || passwordChanged) {
                 const updateRes = await fetch(`${API_URL}/api/admin/update-user`, {
                     method: 'POST',
                     headers: {
@@ -148,8 +158,8 @@ const EditClinicModal = ({ isOpen, onClose, clinic, onClinicUpdated }) => {
                     },
                     body: JSON.stringify({
                         userId: clinic.owner_id,
-                        email: formData.doctorEmail,
-                        password: formData.doctorPassword
+                        ...(emailChanged && { email: formData.doctorEmail }),
+                        ...(passwordChanged && { password: formData.doctorPassword })
                     })
                 });
                 const updateData = await updateRes.json();
@@ -180,8 +190,8 @@ const EditClinicModal = ({ isOpen, onClose, clinic, onClinicUpdated }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto" dir="rtl">
+        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm p-0 md:p-4">
+            <div className="bg-slate-900 border border-white/10 rounded-t-2xl md:rounded-2xl w-full md:max-w-lg p-5 md:p-6 shadow-2xl relative max-h-[95vh] md:max-h-[90vh] overflow-y-auto" dir="rtl">
                 <button
                     onClick={onClose}
                     className="absolute left-4 top-4 text-slate-400 hover:text-white transition-colors"

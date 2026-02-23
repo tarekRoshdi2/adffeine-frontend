@@ -295,13 +295,13 @@ const PatientDetails = ({ patientIdProp, isModal, closeModal }) => {
                 </div>
             )}
 
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 h-[calc(100vh-140px)]">
+            <div className="flex flex-col xl:grid xl:grid-cols-4 gap-6 min-h-[calc(100vh-140px)]">
 
                 {/* Left Column: Fixed Profile Sidebar (1 col) */}
-                <div className="xl:col-span-1 space-y-4 flex flex-col h-full overflow-y-auto custom-scrollbar pr-2">
+                <div className="xl:col-span-1 space-y-4 flex flex-col pr-0 xl:pr-2">
 
                     {/* Main Profile Card */}
-                    <div className="glass-panel p-6 rounded-2xl border border-white/5 text-center relative overflow-hidden group shrink-0">
+                    <div className="glass-panel p-4 md:p-6 rounded-2xl border border-white/5 text-center relative overflow-hidden group shrink-0">
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-sky-500 to-emerald-500"></div>
                         <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-slate-300 text-4xl mb-4 border-4 border-slate-900 shadow-xl relative">
                             <User />
@@ -412,35 +412,35 @@ const PatientDetails = ({ patientIdProp, isModal, closeModal }) => {
                 </div>
 
                 {/* Right Column: Main Content Area (3 cols) */}
-                <div className="xl:col-span-3 flex flex-col h-full bg-slate-900/40 rounded-3xl border border-white/5 overflow-hidden shadow-2xl backdrop-blur-xl">
+                <div className="xl:col-span-3 flex flex-col bg-slate-900/40 rounded-3xl border border-white/5 overflow-hidden shadow-2xl backdrop-blur-xl">
 
                     {/* Tabs Header */}
-                    <div className="flex border-b border-white/5 bg-slate-950/50 p-2">
+                    <div className="flex border-b border-white/5 bg-slate-950/50 p-1 md:p-2 overflow-x-auto no-scrollbar whitespace-nowrap">
                         <button
                             onClick={() => setActiveTab('overview')}
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold transition-all
+                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 md:py-3 px-3 md:px-4 rounded-xl text-xs md:text-sm font-bold transition-all min-w-[100px]
                             ${activeTab === 'overview' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900'}`}
                         >
-                            <User size={18} /> نظرة عامة
+                            <User size={16} className="md:w-[18px] md:h-[18px]" /> نظرة عامة
                         </button>
                         <button
                             onClick={() => setActiveTab('visits')}
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold transition-all
+                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 md:py-3 px-3 md:px-4 rounded-xl text-xs md:text-sm font-bold transition-all min-w-[100px]
                             ${activeTab === 'visits' ? 'bg-slate-800 text-sky-400 shadow-md' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900'}`}
                         >
-                            <History size={18} /> الزيارات والروشتات
+                            <History size={16} className="md:w-[18px] md:h-[18px]" /> الزيارات والروشتات
                         </button>
                         <button
                             onClick={() => setActiveTab('edit')}
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold transition-all
+                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 md:py-3 px-3 md:px-4 rounded-xl text-xs md:text-sm font-bold transition-all min-w-[100px]
                             ${activeTab === 'edit' ? 'bg-slate-800 text-emerald-400 shadow-md' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900'}`}
                         >
-                            <Settings size={18} /> تعديل الملف الطبي
+                            <Settings size={16} className="md:w-[18px] md:h-[18px]" /> تعديل الملف الطبي
                         </button>
                     </div>
 
                     {/* Tab Content Area */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+                    <div className="flex-1 p-4 md:p-6 pb-20 md:pb-6">
 
                         {/* TAB 1: Overview */}
                         {activeTab === 'overview' && (

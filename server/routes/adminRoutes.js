@@ -32,6 +32,19 @@ const verifyAdminAuth = async (req, res, next) => {
 };
 // ────────────────────────────────────────────────────────────────────────────
 
+// Get a user's email by their ID (Admin only - bypasses RLS)
+router.get('/user-email/:userId', verifyAdminAuth, async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const { data: { user }, error } = await supabaseAdmin.auth.admin.getUserById(userId);
+        if (error || !user) return res.status(404).json({ error: 'User not found' });
+        res.json({ email: user.email });
+    } catch (err) {
+        console.error('Get user email error:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 // Create a new doctor user (Auth) securely
 router.post('/create-user', verifyAdminAuth, async (req, res) => {
     const { email, password } = req.body;

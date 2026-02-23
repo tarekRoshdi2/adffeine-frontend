@@ -178,23 +178,23 @@ const Overview = () => {
             />
 
             {/* Premium Header */}
-            <header className="flex flex-col md:flex-row justify-between items-end md:items-center gap-4 animate-entry" style={{ animationDelay: '0ms' }}>
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 animate-entry" style={{ animationDelay: '0ms' }}>
                 <div>
-                    <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
+                    <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 flex items-center gap-3">
                         <span className="bg-gradient-to-r from-sky-400 via-purple-400 to-sky-400 bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_3s_linear_infinite]">
                             {clinicName || 'جاري التحميل...'}
                         </span>
                     </h1>
-                    <p className="text-slate-400 font-medium">إليك ملخص سريع لأداء العيادة اليوم.</p>
+                    <p className="text-slate-400 text-sm md:text-base font-medium">إليك ملخص سريع لأداء العيادة اليوم.</p>
                 </div>
 
-                {/* Live Clock Widget (Arrow 3) */}
-                <div className="glass-card px-6 py-3 rounded-2xl border border-sky-500/20 bg-sky-500/5 flex items-center gap-4 shadow-[0_0_20px_rgba(14,165,233,0.1)]">
+                {/* Live Clock Widget */}
+                <div className="glass-card w-full md:w-auto px-6 py-3 rounded-2xl border border-sky-500/20 bg-sky-500/5 flex items-center justify-between md:justify-start gap-4 shadow-[0_0_20px_rgba(14,165,233,0.1)]">
                     <div className="text-right">
-                        <div className="text-2xl font-bold text-white font-mono tracking-wider">
+                        <div className="text-xl md:text-2xl font-bold text-white font-mono tracking-wider">
                             {currentTime.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
                         </div>
-                        <div className="text-xs text-sky-400 font-bold uppercase tracking-widest">
+                        <div className="text-[10px] md:text-xs text-sky-400 font-bold uppercase tracking-widest">
                             {currentTime.toLocaleDateString('ar-EG', { weekday: 'long' })}
                         </div>
                     </div>
@@ -205,7 +205,7 @@ const Overview = () => {
             </header>
 
             {/* 3D Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                 <StatCard
                     icon={<Calendar />}
                     label="حجوزات اليوم"
